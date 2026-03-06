@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Desi Rasoi – Authentic Pure Veg Flavours of India</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Kalam:wght@300;400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --saffron:   #E8821A;
+      --turmeric:  #F5B731;
+      --chilli:    #C0392B;
+      --leaf:      #2D6A4F;
+      --cream:     #FDF6EC;
+      --cardamom:  #3D2B1F;
+      --rose:      #F9D2B0;
+      --white:     #FFFFFF;
+      --shadow:    rgba(61,43,31,.18);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--cardamom);
+      overflow-x: hidden;
+    }
+
+    /* Loader */
+    #loader {
+      position: fixed; inset: 0; background: var(--cardamom);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9999; transition: opacity .6s ease, visibility .6s;
+    }
+    #loader .thali { font-size: 4rem; animation: spin 1.2s linear infinite; }
+    #loader p { color: var(--turmeric); font-family: 'Kalam', cursive; font-size: 1.3rem; margin-top: .6rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loader.hidden { opacity: 0; visibility: hidden; }
+
+    /* Scroll progress */
+    #progress-bar {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--saffron), var(--turmeric));
+      width: 0%; z-index: 8888; transition: width .1s;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 999;
+      background: rgba(253,246,236,.92); backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--turmeric);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .8rem 4rem; transition: box-shadow .3s;
+    }
+    nav.scrolled { box-shadow: 0 4px 24px var(--shadow); }
+    .nav-logo { display: flex; align-items: center; gap: .7rem; text-decoration: none; }
+    .nav-logo .logo-icon { font-size: 2rem; }
+    .nav-logo span { font-family: 'Playfair Display', serif; font-size: 1.55rem; font-weight: 900; color: var(--saffron); }
+    .nav-logo small { display: block; font-size: .65rem; color: var(--leaf); letter-spacing: .12em; text-transform: uppercase; line-height: 1; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--cardamom); font-weight: 500; font-size: .95rem; transition: color .2s; }
+    .nav-links a:hover { color: var(--saffron); }
+    .nav-actions { display: flex; gap: 1rem; align-items: center; }
+    .btn-cart {
+      background: var(--saffron); color: #fff; border: none; cursor: pointer;
+      padding: .55rem 1.3rem; border-radius: 50px; font-size: .95rem; font-weight: 600;
+      display: flex; align-items: center; gap: .4rem; transition: background .2s, transform .15s;
+    }
+    .btn-cart:hover { background: var(--chilli); transform: scale(1.04); }
+    .cart-count {
+      background: var(--turmeric); color: var(--cardamom); border-radius: 50%;
+      width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 700;
+    }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+    .hamburger span { width: 26px; height: 3px; background: var(--cardamom); border-radius: 2px; transition: .3s; }
+
+    /* Hero */
+    #hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--cardamom) 0%, #5c3320 60%, #8b4513 100%);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden; padding-top: 80px;
+    }
+    .hero-bg-pattern {
+      position: absolute; inset: 0; opacity: .07;
+      background-image: repeating-linear-gradient(45deg, var(--turmeric) 0, var(--turmeric) 1px, transparent 0, transparent 50%);
+      background-size: 20px 20px;
+    }
+    .floating-foods { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .float-item {
+      position: absolute; font-size: clamp(1.5rem, 3vw, 2.8rem);
+      animation: floatAround linear infinite; opacity: .25;
+    }
+    @keyframes floatAround {
+      0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+      10%  { opacity: .25; }
+      90%  { opacity: .25; }
+      100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+    }
+    .hero-content {
+      text-align: center; z-index: 2; padding: 2rem;
+      animation: fadeUp .8s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-badge {
+      display: inline-block; background: var(--leaf); color: #fff;
+      padding: .35rem 1.2rem; border-radius: 50px; font-size: .82rem;
+      letter-spacing: .1em; text-transform: uppercase; margin-bottom: 1.2rem;
+      animation: fadeUp .8s .1s ease both;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif; font-size: clamp(3.5rem, 9vw, 7.5rem);
+      font-weight: 900; color: var(--cream); line-height: 1;
+      text-shadow: 0 4px 30px rgba(0,0,0,.4);
+      animation: fadeUp .8s .2s ease both;
+    }
+    .hero-title span { color: var(--turmeric); }
+    .hero-tagline {
+      font-family: 'Kalam', cursive; font-size: clamp(1.1rem, 2.5vw, 1.7rem);
+      color: var(--rose); margin: 1rem 0 2.5rem; letter-spacing: .02em;
+      animation: fadeUp .8s .3s ease both;
+    }
+    .hero-ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; animation: fadeUp .8s .4s ease both; }
+    .btn-primary {
+      background: var(--saffron); color: #fff; text-decoration: none;
+      padding: 1rem 2.5rem; border-radius: 50px; font-weight: 700; font-size: 1.05rem;
+      box-shadow: 0 8px 30px rgba(232,130,26,.4); transition: transform .2s, box-shadow .2s;
+      display: inline-flex; align-items: center; gap: .5rem;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(232,130,26,.5); }
+    .btn-outline {
+      border: 2px solid var(--turmeric); color: var(--turmeric); text-decoration: none;
+      padding: 1rem 2.5rem; border-radius: 50px; font-weight: 600; font-size: 1.05rem;
+      transition: background .2s, color .2s;
+      display: inline-flex; align-items: center; gap: .5rem;
+    }
+    .btn-outline:hover { background: var(--turmeric); color: var(--cardamom); }
+    .hero-stats {
+      display: flex; gap: 2.5rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap;
+      animation: fadeUp .8s .5s ease both;
+    }
+    .stat { text-align: center; }
+    .stat .number { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 900; color: var(--turmeric); }
+    .stat .label { color: var(--rose); font-size: .85rem; }
+
+    /* Section base */
+    section { padding: 6rem 4rem; }
+    .section-header { text-align: center; margin-bottom: 3.5rem; }
+    .section-tag {
+      display: inline-block; background: var(--rose); color: var(--saffron);
+      padding: .3rem 1rem; border-radius: 50px; font-size: .8rem;
+      font-weight: 600; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .8rem;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900; color: var(--cardamom); line-height: 1.15;
+    }
+    .section-subtitle { color: #7a5c4a; font-size: 1.05rem; margin-top: .7rem; max-width: 560px; margin-inline: auto; }
+
+    /* Category Tabs */
+    #menu { background: #fff; }
+    .category-tabs {
+      display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2.5rem;
+    }
+    .tab-btn {
+      padding: .55rem 1.5rem; border-radius: 50px; border: 2px solid var(--rose);
+      background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      font-size: .92rem; font-weight: 600; color: var(--cardamom); transition: all .2s;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--saffron); color: #fff; border-color: var(--saffron);
+    }
+
+    /* Menu Grid */
+    .menu-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.8rem;
+    }
+    .menu-card {
+      background: var(--cream); border-radius: 20px; overflow: hidden;
+      box-shadow: 0 4px 20px var(--shadow); transition: transform .25s, box-shadow .25s;
+      position: relative;
+    }
+    .menu-card:hover { transform: translateY(-6px); box-shadow: 0 12px 36px var(--shadow); }
+    .card-badge {
+      position: absolute; top: 12px; right: 12px; background: var(--chilli);
+      color: #fff; font-size: .7rem; font-weight: 700; padding: .2rem .6rem; border-radius: 50px;
+    }
+    .card-badge.green { background: var(--leaf); }
+    .card-img {
+      width: 100%; height: 175px; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg,var(--rose),var(--turmeric)); font-size: 4.5rem;
+    }
+    .card-body { padding: 1.1rem 1.2rem 1.3rem; }
+    .card-name { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; margin-bottom: .3rem; }
+    .card-desc { color: #7a5c4a; font-size: .85rem; line-height: 1.5; margin-bottom: .9rem; }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .card-price { font-size: 1.2rem; font-weight: 800; color: var(--saffron); }
+    .card-price small { font-size: .75rem; color: #aaa; text-decoration: line-through; margin-left: .3rem; }
+    .add-btn {
+      background: var(--saffron); color: #fff; border: none; cursor: pointer;
+      padding: .45rem 1.1rem; border-radius: 50px; font-size: .88rem; font-weight: 700;
+      transition: background .2s, transform .15s;
+    }
+    .add-btn:hover { background: var(--chilli); transform: scale(1.08); }
+    .qty-controls { display: flex; align-items: center; gap: .5rem; }
+    .qty-btn {
+      background: var(--turmeric); color: var(--cardamom); border: none; cursor: pointer;
+      width: 28px; height: 28px; border-radius: 50%; font-size: 1rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; transition: background .2s;
+    }
+    .qty-btn:hover { background: var(--saffron); color: #fff; }
+    .qty-num { font-weight: 700; min-width: 20px; text-align: center; }
+
+    /* Features */
+    #features { background: var(--cardamom); }
+    #features .section-title { color: var(--cream); }
+    #features .section-subtitle { color: var(--rose); }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.8rem; }
+    .feature-card {
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px; padding: 2rem 1.5rem; text-align: center; transition: background .2s;
+    }
+    .feature-card:hover { background: rgba(255,255,255,.1); }
+    .feature-icon { font-size: 2.8rem; margin-bottom: 1rem; }
+    .feature-title { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--turmeric); margin-bottom: .5rem; }
+    .feature-text { color: var(--rose); font-size: .9rem; line-height: 1.6; }
+
+    /* Cities */
+    #cities { background: var(--cream); }
+    .city-search-wrap { max-width: 500px; margin: 0 auto 2rem; position: relative; }
+    .city-search {
+      width: 100%; padding: .9rem 1.3rem .9rem 3rem;
+      border: 2px solid var(--rose); border-radius: 50px; font-size: 1rem;
+      background: #fff; outline: none; transition: border-color .2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .city-search:focus { border-color: var(--saffron); }
+    .city-search-icon { position: absolute; left: 1.1rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem; }
+    .cities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 1rem; max-height: 450px; overflow-y: auto; }
+    .city-pill {
+      background: #fff; border: 1.5px solid var(--rose); border-radius: 12px;
+      padding: .7rem 1rem; font-weight: 600; font-size: .88rem; text-align: center;
+      cursor: pointer; transition: all .2s; color: var(--cardamom);
+    }
+    .city-pill:hover { background: var(--saffron); color: #fff; border-color: var(--saffron); }
+    .city-pill .city-icon { display: block; font-size: 1.4rem; margin-bottom: .2rem; }
+
+    /* Reviews */
+    #reviews { background: #fff; }
+    .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.8rem; }
+    .review-card {
+      background: var(--cream); border-radius: 20px; padding: 1.8rem;
+      box-shadow: 0 4px 20px var(--shadow); position: relative;
+    }
+    .review-quote { font-size: 3rem; color: var(--turmeric); line-height: 1; margin-bottom: .5rem; font-family: 'Playfair Display', serif; }
+    .review-text { color: var(--cardamom); font-size: .95rem; line-height: 1.7; margin-bottom: 1rem; }
+    .review-author { display: flex; align-items: center; gap: .8rem; }
+    .review-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg,var(--saffron),var(--turmeric)); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+    .review-name { font-weight: 700; font-size: .95rem; }
+    .review-city { font-size: .8rem; color: #888; }
+    .stars { color: var(--turmeric); font-size: .9rem; margin-bottom: .3rem; }
+
+    /* Order Form */
+    #order { background: linear-gradient(135deg, var(--saffron) 0%, var(--turmeric) 100%); }
+    #order .section-title { color: #fff; }
+    #order .section-subtitle { color: rgba(255,255,255,.85); }
+    .order-form-card {
+      background: #fff; border-radius: 28px; padding: 3rem;
+      max-width: 680px; margin: 0 auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
+    .form-group { display: flex; flex-direction: column; gap: .4rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label { font-weight: 600; font-size: .9rem; color: var(--cardamom); }
+    .form-input, .form-select, .form-textarea {
+      padding: .75rem 1rem; border: 2px solid var(--rose); border-radius: 12px;
+      font-family: 'DM Sans', sans-serif; font-size: .95rem; outline: none;
+      transition: border-color .2s; background: var(--cream);
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--saffron); background: #fff; }
+    .submit-btn {
+      width: 100%; background: var(--saffron); color: #fff; border: none;
+      padding: 1.1rem; border-radius: 14px; font-size: 1.1rem; font-weight: 700;
+      cursor: pointer; transition: background .2s, transform .15s;
+      display: flex; align-items: center; justify-content: center; gap: .5rem; margin-top: .8rem;
+    }
+    .submit-btn:hover { background: var(--chilli); transform: scale(1.01); }
+
+    /* Cart Sidebar */
+    .cart-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 8000;
+      opacity: 0; visibility: hidden; transition: .3s;
+    }
+    .cart-overlay.open { opacity: 1; visibility: visible; }
+    .cart-sidebar {
+      position: fixed; right: 0; top: 0; bottom: 0; width: min(400px, 100vw);
+      background: #fff; z-index: 8001; transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1);
+      display: flex; flex-direction: column; box-shadow: -8px 0 40px rgba(0,0,0,.2);
+    }
+    .cart-sidebar.open { transform: translateX(0); }
+    .cart-header {
+      padding: 1.5rem; border-bottom: 2px solid var(--rose);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cart-header h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--cardamom); }
+    .cart-close { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--cardamom); }
+    .cart-items { flex: 1; overflow-y: auto; padding: 1.2rem; }
+    .cart-item { display: flex; gap: 1rem; align-items: center; padding: .9rem 0; border-bottom: 1px solid var(--rose); }
+    .cart-item-icon { font-size: 2rem; flex-shrink: 0; width: 48px; text-align: center; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-weight: 700; font-size: .95rem; }
+    .cart-item-price { color: var(--saffron); font-size: .9rem; font-weight: 600; }
+    .cart-item-remove { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #ccc; transition: color .2s; }
+    .cart-item-remove:hover { color: var(--chilli); }
+    .cart-empty { text-align: center; padding: 3rem 1rem; }
+    .cart-empty .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .cart-empty p { color: #999; }
+    .cart-footer { padding: 1.5rem; border-top: 2px solid var(--rose); }
+    .cart-total { display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 700; margin-bottom: 1.2rem; }
+    .cart-total span:last-child { color: var(--saffron); }
+    .checkout-btn {
+      width: 100%; background: var(--saffron); color: #fff; border: none;
+      padding: 1rem; border-radius: 12px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: background .2s;
+    }
+    .checkout-btn:hover { background: var(--chilli); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--leaf); color: #fff; padding: .8rem 2rem; border-radius: 50px;
+      font-weight: 600; font-size: .95rem; z-index: 9000;
+      transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .35s;
+      opacity: 0; pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* Footer */
+    footer { background: var(--cardamom); color: var(--rose); padding: 4rem 4rem 2rem; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+    .footer-brand .brand-name { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--turmeric); margin-bottom: .5rem; }
+    .footer-brand p { font-size: .9rem; line-height: 1.7; color: var(--rose); max-width: 280px; }
+    .footer-col h4 { color: var(--turmeric); font-size: 1rem; margin-bottom: 1.2rem; font-weight: 700; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+    .footer-col a { color: var(--rose); text-decoration: none; font-size: .9rem; transition: color .2s; }
+    .footer-col a:hover { color: var(--turmeric); }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .footer-bottom p { font-size: .85rem; color: rgba(255,255,255,.4); }
+    .social-links { display: flex; gap: .8rem; }
+    .social-link { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; font-size: 1rem; text-decoration: none; transition: background .2s; }
+    .social-link:hover { background: var(--saffron); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 9500;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transition: .3s;
+    }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+    .modal-box {
+      background: #fff; border-radius: 24px; padding: 3rem; text-align: center;
+      max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      transform: scale(.9); transition: transform .3s;
+    }
+    .modal-overlay.open .modal-box { transform: scale(1); }
+    .modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--saffron); margin-bottom: .5rem; }
+    .modal-text { color: #777; margin-bottom: 1.5rem; line-height: 1.6; }
+    .modal-close-btn { background: var(--saffron); color: #fff; border: none; padding: .8rem 2.5rem; border-radius: 50px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+
+    /* Animations */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      nav { padding: .8rem 2rem; }
+      section { padding: 5rem 2rem; }
+      footer { padding: 3rem 2rem 2rem; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex; flex-direction: column; position: absolute; top: 70px; left: 0; right: 0;
+        background: var(--cream); padding: 1rem 2rem; border-bottom: 2px solid var(--rose); z-index: 998;
+      }
+      .hamburger { display: flex; }
+      .form-row { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+      .hero-stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loader -->
+<div id="loader">
+  <div class="thali">🍛</div>
+  <p>Preparing your Thali…</p>
+</div>
+
+<!-- Progress Bar -->
+<div id="progress-bar"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Cart Overlay -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h2>🛒 Your Thali</h2>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">
+      <div class="empty-icon">🍽️</div>
+      <p>Your cart is empty.<br>Add some delicious items!</p>
+    </div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total"><span>Total</span><span id="cartTotal">₹0</span></div>
+    <button class="checkout-btn" onclick="proceedCheckout()">Proceed to Order →</button>
+  </div>
+</div>
+
+<!-- Order Success Modal -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal-box">
+    <div class="modal-icon">🎉</div>
+    <div class="modal-title">Order Placed!</div>
+    <p class="modal-text">Your delicious Desi meal is being prepared with love and will reach you shortly. <strong>Khana khao, mast raho!</strong></p>
+    <button class="modal-close-btn" onclick="closeModal()">Wonderful!</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">
+    <span class="logo-icon">🍲</span>
+    <div>
+      <span>Desi Rasoi</span>
+      <small>Pure Veg · Authentic India</small>
+    </div>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#features">Why Us</a></li>
+    <li><a href="#cities">Cities</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="#order">Order</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn-cart" onclick="toggleCart()">
+      🛒 Cart <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <div class="hamburger" id="hamburger" onclick="toggleNav()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-pattern"></div>
+  <div class="floating-foods" id="floatingFoods"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🌿 100% Pure Vegetarian</div>
+    <h1 class="hero-title">Desi <span>Rasoi</span></h1>
+    <p class="hero-tagline">Ghar ka swad, desh ka pyaar — delivered pan-India 🇮🇳</p>
+    <div class="hero-ctas">
+      <a href="#menu" class="btn-primary">🍽️ Explore Menu</a>
+      <a href="#order" class="btn-outline">📦 Order Now</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="number">500+</div><div class="label">Dishes</div></div>
+      <div class="stat"><div class="number">700+</div><div class="label">Cities</div></div>
+      <div class="stat"><div class="number">4.8★</div><div class="label">Avg Rating</div></div>
+      <div class="stat"><div class="number">2M+</div><div class="label">Happy Customers</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section id="menu">
+  <div class="section-header reveal">
+    <div class="section-tag">🍱 Our Menu</div>
+    <h2 class="section-title">Flavours from Every Corner of India</h2>
+    <p class="section-subtitle">Handcrafted recipes passed down through generations. Zero compromises on tradition.</p>
+  </div>
+  <div class="category-tabs reveal" id="categoryTabs"></div>
+  <div class="menu-grid" id="menuGrid"></div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-header reveal">
+    <div class="section-tag" style="background:rgba(255,255,255,.1);color:var(--turmeric)">✨ Why Desi Rasoi</div>
+    <h2 class="section-title">Made with Maa ka Pyaar</h2>
+    <p class="section-subtitle">Every order is a promise of quality, purity and authentic taste.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card reveal"><div class="feature-icon">🌿</div><div class="feature-title">100% Pure Veg</div><p class="feature-text">No eggs. No meat. Ever. Strict vegetarian kitchen blessed by Jain and Satvik standards.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon">🏡</div><div class="feature-title">Home-style Recipes</div><p class="feature-text">Our recipes come from real dadi-nani kitchens — no artificial shortcuts, only love.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon">🚚</div><div class="feature-title">Pan-India Delivery</div><p class="feature-text">We deliver to 700+ cities across all 28 states and 8 UTs of India. From Leh to Kanyakumari.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon">🧊</div><div class="feature-title">Hygienically Packed</div><p class="feature-text">Temperature-controlled packaging keeps your sweets fresh and spices aromatic on arrival.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon">💰</div><div class="feature-title">Honest Pricing</div><p class="feature-text">No hidden charges. What you see is what you pay. Free shipping on orders above ₹499.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon">🔄</div><div class="feature-title">Easy Returns</div><p class="feature-text">Not happy? We will replace it or refund you — no questions asked within 24 hours.</p></div>
+  </div>
+</section>
+
+<!-- CITIES -->
+<section id="cities">
+  <div class="section-header reveal">
+    <div class="section-tag">🗺️ We Deliver To</div>
+    <h2 class="section-title">Your City is on Our Map</h2>
+    <p class="section-subtitle">700+ cities and counting. Find your city below and click to auto-select it for ordering.</p>
+  </div>
+  <div class="city-search-wrap reveal">
+    <span class="city-search-icon">🔍</span>
+    <input type="text" class="city-search" id="citySearch" placeholder="Search your city…" oninput="filterCities()" />
+  </div>
+  <div class="cities-grid" id="citiesGrid"></div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="section-header reveal">
+    <div class="section-tag">⭐ Reviews</div>
+    <h2 class="section-title">What India is Saying</h2>
+    <p class="section-subtitle">Real reviews from real food lovers all across the country.</p>
+  </div>
+  <div class="reviews-grid" id="reviewsGrid"></div>
+</section>
+
+<!-- ORDER FORM -->
+<section id="order">
+  <div class="section-header reveal">
+    <div class="section-tag" style="background:rgba(255,255,255,.25);color:#fff">📦 Place Order</div>
+    <h2 class="section-title">Order Your Desi Feast</h2>
+    <p class="section-subtitle">Fill in your details and we will deliver happiness to your doorstep.</p>
+  </div>
+  <div class="order-form-card reveal">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input type="text" class="form-input" id="fName" placeholder="Ramesh Kumar" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number *</label>
+        <input type="tel" class="form-input" id="fPhone" placeholder="+91 98765 43210" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="fEmail" placeholder="you@email.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">City *</label>
+        <select class="form-select" id="fCity">
+          <option value="">Select City</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group full">
+        <label class="form-label">Delivery Address *</label>
+        <input type="text" class="form-input" id="fAddress" placeholder="Flat / House No, Street, Area, Pincode" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Special Instructions</label>
+        <input type="text" class="form-input" id="fInstructions" placeholder="e.g. Less spicy please" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Method</label>
+        <select class="form-select" id="fPayment">
+          <option value="cod">Cash on Delivery</option>
+          <option value="upi">UPI / PhonePe / GPay</option>
+          <option value="card">Debit / Credit Card</option>
+          <option value="netbanking">Net Banking</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:1.2rem">
+      <label class="form-label">Your Cart Summary</label>
+      <div id="formCartSummary" style="background:var(--cream);border-radius:10px;padding:1rem;font-size:.9rem;color:#666;min-height:48px;">
+        No items in cart yet. <a href="#menu" style="color:var(--saffron);text-decoration:none;font-weight:600;">Browse menu →</a>
+      </div>
+    </div>
+    <button class="submit-btn" onclick="submitOrder()">
+      🚀 Place My Order
+    </button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="brand-name">🍲 Desi Rasoi</div>
+      <p>Bringing the authentic taste of India's kitchens to your doorstep. 100% Pure Veg. 100% Love. Delivered pan-India.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="#menu">Our Menu</a></li>
+        <li><a href="#features">About Us</a></li>
+        <li><a href="#cities">Delivery Cities</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#order">Order Now</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Categories</h4>
+      <ul>
+        <li><a href="#menu">Indian Sweets</a></li>
+        <li><a href="#menu">Crispy Snacks</a></li>
+        <li><a href="#menu">Main Course</a></li>
+        <li><a href="#menu">Breads</a></li>
+        <li><a href="#menu">Beverages</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact Us</h4>
+      <ul>
+        <li><a href="#">📞 1800-DESI-VEG</a></li>
+        <li><a href="#">📧 hello@desirasoi.in</a></li>
+        <li><a href="#">📍 New Delhi, India</a></li>
+        <li><a href="#">⏰ 9 AM – 9 PM Daily</a></li>
+        <li><a href="#">💬 WhatsApp Support</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Desi Rasoi. Made with ❤️ in India 🇮🇳 | All rights reserved.</p>
+    <div class="social-links">
+      <a class="social-link" href="#">📘</a>
+      <a class="social-link" href="#">📸</a>
+      <a class="social-link" href="#">🐦</a>
+      <a class="social-link" href="#">▶️</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── DATA ──
+const menuData = [
+  { id:1,  name:'Gulab Jamun',     category:'Sweets',      emoji:'🍩', desc:'Soft khoya dumplings soaked in rose-saffron syrup. A timeless classic.',              price:149, mrp:199, badge:'Bestseller' },
+  { id:2,  name:'Rasgulla',        category:'Sweets',      emoji:'⚪', desc:'Spongy chenna balls floating in chilled light sugar syrup from Bengal.',               price:129, mrp:169, badge:'Popular' },
+  { id:3,  name:'Kaju Katli',      category:'Sweets',      emoji:'🔷', desc:'Pure cashew fudge with silver varak. Perfect festive gift.',                           price:349, mrp:449, badge:'Premium' },
+  { id:4,  name:'Motichoor Laddu', category:'Sweets',      emoji:'🟡', desc:'Fine boondi spheres pressed into golden laddus. North India favourite.',               price:99,  mrp:129, badge:'New' },
+  { id:5,  name:'Gajar Halwa',     category:'Sweets',      emoji:'🥕', desc:'Slow-cooked red carrot halwa with desi ghee, milk and nuts.',                          price:179, mrp:229, badge:null },
+  { id:6,  name:'Mathura Peda',    category:'Sweets',      emoji:'🟤', desc:'Mathura-style milk peda with cardamom and pistachio dust.',                            price:119, mrp:149, badge:null },
+  { id:7,  name:'Samosa',          category:'Snacks',      emoji:'🔺', desc:'Crispy pastry filled with spiced potato and peas. The perfect chai companion.',        price:49,  mrp:69,  badge:'Bestseller' },
+  { id:8,  name:'Raj Kachori',     category:'Snacks',      emoji:'🟠', desc:'Stuffed kachori with dal and tangy chutneys — authentic Rajasthan style.',             price:59,  mrp:79,  badge:'Popular' },
+  { id:9,  name:'Bhel Puri',       category:'Snacks',      emoji:'🥗', desc:'Puffed rice tangled with sev, veggies and tamarind — Mumbai street magic.',            price:79,  mrp:99,  badge:null },
+  { id:10, name:'Vada Pav',        category:'Snacks',      emoji:'🍔', desc:"Mumbai's soul food — spicy potato vada in a soft pav with fiery chutney.",             price:69,  mrp:89,  badge:'Street Fav' },
+  { id:11, name:'Chakli',          category:'Snacks',      emoji:'🌀', desc:'Crispy spiral snack made from rice flour, butter and sesame seeds.',                   price:89,  mrp:119, badge:null },
+  { id:12, name:'Mathri',          category:'Snacks',      emoji:'🟫', desc:'Flaky deep-fried crackers with ajwain and pepper. Tea-time perfection.',               price:79,  mrp:99,  badge:null },
+  { id:13, name:'Dal Makhani',     category:'Main Course', emoji:'🫘', desc:'Slow-simmered black lentils in tomato-butter gravy. A Punjabi legend.',               price:199, mrp:249, badge:'Bestseller' },
+  { id:14, name:'Palak Paneer',    category:'Main Course', emoji:'🥬', desc:'Cottage cheese cubes in velvety spinach gravy — home-style and heartwarming.',        price:229, mrp:289, badge:'Popular' },
+  { id:15, name:'Chole Bhature',   category:'Main Course', emoji:'🫓', desc:'Spicy chickpea curry with fluffy deep-fried bhature. North India soul food.',         price:179, mrp:219, badge:null },
+  { id:16, name:'Bisi Bele Bath',  category:'Main Course', emoji:'🍲', desc:"Karnataka's iconic one-pot lentil-rice dish with generous ghee tempering.",           price:159, mrp:199, badge:'South Special' },
+  { id:17, name:'Rajma Chawal',    category:'Main Course', emoji:'❤️', desc:'Kidney beans in thick tomato masala served over steamed basmati rice.',               price:149, mrp:189, badge:null },
+  { id:18, name:'Pav Bhaji',       category:'Main Course', emoji:'🧆', desc:'Mixed veggie mash in tangy tomato base, served with buttered pav.',                   price:139, mrp:169, badge:null },
+  { id:19, name:'Butter Naan',     category:'Breads',      emoji:'🫓', desc:'Soft leavened flatbread baked in tandoor, finished with white butter.',               price:49,  mrp:65,  badge:null },
+  { id:20, name:'Missi Roti',      category:'Breads',      emoji:'🟡', desc:'Spiced besan-wheat flatbread with onion, ajwain and fresh methi leaves.',             price:39,  mrp:55,  badge:null },
+  { id:21, name:'Poori',           category:'Breads',      emoji:'⭕', desc:'Puffed whole-wheat poori pairs beautifully with aloo sabzi or halwa.',                price:29,  mrp:39,  badge:'Classic' },
+  { id:22, name:'Thepla',          category:'Breads',      emoji:'🟤', desc:'Gujarati methi flatbread with sesame. Stays fresh for days — ideal travel snack!',   price:59,  mrp:79,  badge:'Gujarat' },
+  { id:23, name:'Masala Chai',     category:'Beverages',   emoji:'☕', desc:'Spiced tea with ginger, cardamom, tulsi and a hint of saffron.',                      price:39,  mrp:55,  badge:null },
+  { id:24, name:'Thandai',         category:'Beverages',   emoji:'🥛', desc:'Chilled milk blend with almonds, rose, pepper and saffron — Holi special.',          price:89,  mrp:119, badge:'Seasonal' },
+  { id:25, name:'Sweet Lassi',     category:'Beverages',   emoji:'🥤', desc:'Thick Amritsar-style sweet yoghurt lassi topped with malai cream.',                  price:79,  mrp:99,  badge:'Popular' },
+  { id:26, name:'Jal Jeera',       category:'Beverages',   emoji:'🟢', desc:"Cooling cumin-mint lemon cooler — India's original refreshing summer drink.",        price:49,  mrp:69,  badge:null },
+];
+
+const cities = [
+  {name:'Mumbai',icon:'🏙️'},{name:'Delhi',icon:'🏛️'},{name:'Bengaluru',icon:'🌿'},
+  {name:'Chennai',icon:'🏖️'},{name:'Kolkata',icon:'🌸'},{name:'Hyderabad',icon:'💎'},
+  {name:'Pune',icon:'🎓'},{name:'Ahmedabad',icon:'🪁'},{name:'Jaipur',icon:'🏰'},
+  {name:'Lucknow',icon:'🍽️'},{name:'Surat',icon:'💍'},{name:'Nagpur',icon:'🟠'},
+  {name:'Indore',icon:'🌶️'},{name:'Bhopal',icon:'💧'},{name:'Patna',icon:'📚'},
+  {name:'Kochi',icon:'🌴'},{name:'Coimbatore',icon:'🧵'},{name:'Mysuru',icon:'🕌'},
+  {name:'Varanasi',icon:'🕯️'},{name:'Amritsar',icon:'🕌'},{name:'Chandigarh',icon:'🌳'},
+  {name:'Dehradun',icon:'⛰️'},{name:'Shimla',icon:'❄️'},{name:'Srinagar',icon:'🌷'},
+  {name:'Guwahati',icon:'🍵'},{name:'Bhubaneswar',icon:'🏛️'},{name:'Raipur',icon:'🌾'},
+  {name:'Ranchi',icon:'🌊'},{name:'Thiruvananthapuram',icon:'🌺'},{name:'Visakhapatnam',icon:'⚓'},
+  {name:'Vijayawada',icon:'🌉'},{name:'Madurai',icon:'🪷'},{name:'Tiruchirappalli',icon:'🏔️'},
+  {name:'Kozhikode',icon:'🌊'},{name:'Mangaluru',icon:'🌴'},{name:'Hubli',icon:'🚂'},
+  {name:'Aurangabad',icon:'🏛️'},{name:'Nashik',icon:'🍇'},{name:'Kolhapur',icon:'🏆'},
+  {name:'Solapur',icon:'🌻'},{name:'Jodhpur',icon:'🔵'},{name:'Udaipur',icon:'🏞️'},
+  {name:'Ajmer',icon:'🕌'},{name:'Kota',icon:'📚'},{name:'Bikaner',icon:'🐪'},
+  {name:'Agra',icon:'🕌'},{name:'Meerut',icon:'⚙️'},{name:'Prayagraj',icon:'🌀'},
+  {name:'Kanpur',icon:'🏭'},{name:'Gorakhpur',icon:'🌾'},{name:'Ghaziabad',icon:'🏙️'},
+  {name:'Noida',icon:'💻'},{name:'Faridabad',icon:'🏗️'},{name:'Gurugram',icon:'💼'},
+  {name:'Jabalpur',icon:'🌄'},{name:'Gwalior',icon:'🏰'},{name:'Ujjain',icon:'🕍'},
+  {name:'Durgapur',icon:'⚙️'},{name:'Siliguri',icon:'☕'},{name:'Asansol',icon:'🔥'},
+  {name:'Howrah',icon:'🌉'},{name:'Jammu',icon:'⛰️'},{name:'Leh',icon:'🏔️'},
+  {name:'Panaji',icon:'🏖️'},{name:'Gandhinagar',icon:'🏛️'},{name:'Rajkot',icon:'💎'},
+  {name:'Vadodara',icon:'🏛️'},{name:'Bhavnagar',icon:'🌊'},{name:'Jamnagar',icon:'⚓'},
+  {name:'Dhanbad',icon:'⛏️'},{name:'Bokaro',icon:'🔩'},{name:'Imphal',icon:'🌺'},
+  {name:'Shillong',icon:'🌧️'},{name:'Aizawl',icon:'🌄'},{name:'Kohima',icon:'🌿'},
+  {name:'Itanagar',icon:'🏞️'},{name:'Agartala',icon:'🌸'},{name:'Gangtok',icon:'⛰️'},
+  {name:'Dispur',icon:'🐘'},{name:'Rourkela',icon:'🔧'},{name:'Cuttack',icon:'🌊'},
+  {name:'Nellore',icon:'🌾'},{name:'Warangal',icon:'🏛️'},{name:'Karimnagar',icon:'💧'},
+  {name:'Tirupati',icon:'🙏'},{name:'Guntur',icon:'🌶️'},{name:'Salem',icon:'⚙️'},
+  {name:'Erode',icon:'🧵'},{name:'Tirunelveli',icon:'🌴'},{name:'Thanjavur',icon:'🥁'},
+  {name:'Vellore',icon:'🏥'},{name:'Pondicherry',icon:'🌸'},{name:'Bilaspur',icon:'⛏️'},
+  {name:'Daman',icon:'🏖️'},{name:'Silvassa',icon:'🌿'},{name:'Port Blair',icon:'🏝️'},
+  {name:'Haridwar',icon:'🕉️'},{name:'Rishikesh',icon:'🧘'},{name:'Mathura',icon:'🪷'},
+  {name:'Vrindavan',icon:'🌸'},{name:'Ayodhya',icon:'🏛️'},{name:'Nanded',icon:'🕌'},
+  {name:'Latur',icon:'🌾'},{name:'Akola',icon:'🌿'},{name:'Amravati',icon:'🌻'},
+];
+
+const reviews = [
+  { name:'Priya Sharma',  city:'Delhi',     text:'Finally an online store that delivers REAL Kaju Katli! Just like what we get at Bikanervala but at half the price. My whole family is hooked.',    rating:5, avatar:'👩' },
+  { name:'Rahul Verma',   city:'Mumbai',    text:'Ordered Gulab Jamun and Pav Bhaji combo for my office party. 30 people, not a single complaint. Will definitely order again next month!',           rating:5, avatar:'👨' },
+  { name:'Anita Desai',   city:'Ahmedabad', text:'The Thepla came fresh-packed and tasted exactly like my nani used to make. Even stayed crisp for 3 days. Genuine Gujarati flavours!',              rating:5, avatar:'👩' },
+  { name:'Suresh Pillai', city:'Kochi',     text:'Pan-India delivery is real! Got my order in Kochi within 2 days. Dal Makhani and butter naan hit differently. Highly recommend.',                  rating:5, avatar:'🧑' },
+  { name:'Kavya Reddy',   city:'Hyderabad', text:'Bisi Bele Bath was outstanding — exactly the right amount of ghee and tempering. Not tourist food, this is the real Karnataka thing!',             rating:4, avatar:'👧' },
+  { name:'Manish Tiwari', city:'Lucknow',   text:'Sent a sweet hamper to my parents in Varanasi. They called me crying with happiness. Desi Rasoi delivered pure nostalgia and love!',               rating:5, avatar:'🧔' },
+];
+
+// ── STATE ──
+let cart = [];
+let activeCategory = 'All';
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1400);
+  renderCategories();
+  renderMenu();
+  renderCities();
+  renderReviews();
+  populateCitySelect();
+  initFloatingFoods();
+  initScrollReveal();
+  initProgressBar();
+});
+
+// ── FLOATING FOODS ──
+function initFloatingFoods() {
+  const foods = ['🌶️','🍛','🥘','🍚','🫓','☕','🥭','🥜','🌿','🫙','🍩','⭐','🥛','🌸'];
+  const container = document.getElementById('floatingFoods');
+  foods.forEach(f => {
+    const el = document.createElement('div');
+    el.className = 'float-item';
+    el.textContent = f;
+    el.style.left = (Math.random() * 90 + 5) + '%';
+    el.style.animationDuration = (8 + Math.random() * 14) + 's';
+    el.style.animationDelay = (Math.random() * 10) + 's';
+    container.appendChild(el);
+  });
+}
+
+// ── PROGRESS BAR ──
+function initProgressBar() {
+  window.addEventListener('scroll', () => {
+    const el = document.getElementById('progress-bar');
+    const doc = document.documentElement;
+    const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+    el.style.width = pct + '%';
+    document.getElementById('navbar').classList.toggle('scrolled', doc.scrollTop > 60);
+  });
+}
+
+// ── SCROLL REVEAL ──
+function initScrollReveal() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+}
+
+// ── CATEGORIES ──
+function renderCategories() {
+  const cats = ['All', ...new Set(menuData.map(i => i.category))];
+  document.getElementById('categoryTabs').innerHTML = cats.map(c =>
+    `<button class="tab-btn ${c === activeCategory ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`
+  ).join('');
+}
+function setCategory(cat) {
+  activeCategory = cat;
+  renderCategories();
+  renderMenu();
+}
+
+// ── MENU ──
+function renderMenu() {
+  const filtered = activeCategory === 'All' ? menuData : menuData.filter(i => i.category === activeCategory);
+  document.getElementById('menuGrid').innerHTML = filtered.map(item => {
+    const inCart = cart.find(c => c.id === item.id);
+    const qty = inCart ? inCart.qty : 0;
+    const badgeHtml = item.badge ? `<div class="card-badge ${item.badge === 'New' ? 'green' : ''}">${item.badge}</div>` : '';
+    const ctrlHtml = qty > 0
+      ? `<div class="qty-controls">
+           <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+           <span class="qty-num">${qty}</span>
+           <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+         </div>`
+      : `<button class="add-btn" onclick="addToCart(${item.id})">Add +</button>`;
+    return `
+      <div class="menu-card">
+        ${badgeHtml}
+        <div class="card-img">${item.emoji}</div>
+        <div class="card-body">
+          <div class="card-name">${item.name}</div>
+          <div class="card-desc">${item.desc}</div>
+          <div class="card-footer">
+            <div class="card-price">₹${item.price}<small>₹${item.mrp}</small></div>
+            ${ctrlHtml}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── CART ──
+function addToCart(id) {
+  const item = menuData.find(i => i.id === id);
+  const existing = cart.find(c => c.id === id);
+  if (existing) existing.qty++;
+  else cart.push({ ...item, qty: 1 });
+  updateCartUI();
+  renderMenu();
+  showToast(`${item.emoji} ${item.name} added to cart!`);
+}
+function changeQty(id, delta) {
+  const idx = cart.findIndex(c => c.id === id);
+  if (idx === -1) return;
+  cart[idx].qty += delta;
+  if (cart[idx].qty <= 0) cart.splice(idx, 1);
+  updateCartUI();
+  renderMenu();
+}
+function removeFromCart(id) {
+  cart = cart.filter(c => c.id !== id);
+  updateCartUI();
+  renderMenu();
+}
+function updateCartUI() {
+  const count = cart.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('cartCount').textContent = count;
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  document.getElementById('cartTotal').textContent = '₹' + total.toFixed(0);
+  const itemsEl = document.getElementById('cartItems');
+  const footerEl = document.getElementById('cartFooter');
+  if (cart.length === 0) {
+    itemsEl.innerHTML = `<div class="cart-empty"><div class="empty-icon">🍽️</div><p>Your cart is empty.<br>Add some delicious items!</p></div>`;
+    footerEl.style.display = 'none';
+  } else {
+    itemsEl.innerHTML = cart.map(i => `
+      <div class="cart-item">
+        <div class="cart-item-icon">${i.emoji}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${i.name}</div>
+          <div class="cart-item-price">₹${i.price} × ${i.qty} = ₹${i.price * i.qty}</div>
+          <div class="qty-controls" style="margin-top:.4rem">
+            <button class="qty-btn" onclick="changeQty(${i.id},-1)">−</button>
+            <span class="qty-num">${i.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${i.id},1)">+</button>
+          </div>
+        </div>
+        <button class="cart-item-remove" onclick="removeFromCart(${i.id})">🗑️</button>
+      </div>`).join('');
+    footerEl.style.display = 'block';
+  }
+  // form cart summary
+  const summaryEl = document.getElementById('formCartSummary');
+  if (cart.length === 0) {
+    summaryEl.innerHTML = `No items in cart yet. <a href="#menu" style="color:var(--saffron);text-decoration:none;font-weight:600;">Browse menu →</a>`;
+  } else {
+    summaryEl.innerHTML = cart.map(i =>
+      `<span style="margin-right:.8rem;display:inline-block">${i.emoji} ${i.name} ×${i.qty} <b style="color:var(--saffron)">₹${i.price*i.qty}</b></span>`
+    ).join('') +
+    `<div style="margin-top:.6rem;font-weight:700;color:var(--cardamom);border-top:1px solid var(--rose);padding-top:.5rem">
+       Total: ₹${total.toFixed(0)}
+       ${total >= 499 ? '<span style="color:var(--leaf);font-size:.82rem;margin-left:.5rem">✓ Free Shipping!</span>' : '<span style="color:#aaa;font-size:.82rem;margin-left:.5rem">(Free shipping on ₹499+)</span>'}
+     </div>`;
+  }
+}
+function toggleCart() {
+  document.getElementById('cartSidebar').classList.toggle('open');
+  document.getElementById('cartOverlay').classList.toggle('open');
+}
+function proceedCheckout() {
+  toggleCart();
+  document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── CITIES ──
+function renderCities() {
+  document.getElementById('citiesGrid').innerHTML = cities.map(c =>
+    `<div class="city-pill" onclick="selectCity('${c.name}')">
+       <span class="city-icon">${c.icon}</span>${c.name}
+     </div>`
+  ).join('');
+}
+function filterCities() {
+  const q = document.getElementById('citySearch').value.toLowerCase();
+  document.querySelectorAll('.city-pill').forEach(p => {
+    p.style.display = p.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+function selectCity(name) {
+  document.getElementById('fCity').value = name;
+  document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+  showToast(`📍 ${name} selected for delivery!`);
+}
+function populateCitySelect() {
+  const sel = document.getElementById('fCity');
+  cities.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.name; o.textContent = c.name;
+    sel.appendChild(o);
+  });
+}
+
+// ── REVIEWS ──
+function renderReviews() {
+  document.getElementById('reviewsGrid').innerHTML = reviews.map(r => `
+    <div class="review-card reveal">
+      <div class="review-quote">"</div>
+      <div class="stars">${'⭐'.repeat(r.rating)}</div>
+      <p class="review-text">${r.text}</p>
+      <div class="review-author">
+        <div class="review-avatar">${r.avatar}</div>
+        <div>
+          <div class="review-name">${r.name}</div>
+          <div class="review-city">📍 ${r.city}</div>
+        </div>
+      </div>
+    </div>`).join('');
+  const obs = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }), { threshold: 0.12 });
+  document.querySelectorAll('.review-card').forEach(el => obs.observe(el));
+}
+
+// ── ORDER ──
+function submitOrder() {
+  const name    = document.getElementById('fName').value.trim();
+  const phone   = document.getElementById('fPhone').value.trim();
+  const city    = document.getElementById('fCity').value;
+  const address = document.getElementById('fAddress').value.trim();
+  if (!name)    { showToast('⚠️ Please enter your name!');             return; }
+  if (!phone)   { showToast('⚠️ Please enter your phone number!');    return; }
+  if (!city)    { showToast('⚠️ Please select your city!');           return; }
+  if (!address) { showToast('⚠️ Please enter your delivery address!'); return; }
+  if (cart.length === 0) { showToast('🛒 Your cart is empty! Add items first.'); return; }
+  document.getElementById('orderModal').classList.add('open');
+  cart = [];
+  updateCartUI();
+  renderMenu();
+  ['fName','fPhone','fEmail','fAddress'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fCity').value = '';
+}
+function closeModal() {
+  document.getElementById('orderModal').classList.remove('open');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ── NAV ──
+function toggleNav() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+</script>
+</body>
+</html>
